@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "storage_central:block/storage_terminal"
+    }
+  }
+}

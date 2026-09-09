@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " D ",
+    "DID",
+    " D "
+  ],
+  "key": {
+    "D": { "item": "minecraft:diamond" },
+    "I": { "item": "storage_central:range_upgrade_tier1" }
+  },
+  "result": {
+    "id": "storage_central:range_upgrade_tier2",
+    "count": 1
+  }
+}
