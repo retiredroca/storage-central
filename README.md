@@ -73,4 +73,8 @@ On servers, the max tier can be limited via `config/storage_central-server.toml`
 - **Package**: `com.retiredroca.storagecentral`
 - **Server config**: `config/storage_central-server.toml`
 
+## License
+
+Released under the [Apache License 2.0](LICENSE).
+
 *Built with the [NeoForge MDK](https://github.com/neoforged/MDK). Minecraft and NeoForge are property of their respective owners.*
