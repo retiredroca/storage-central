@@ -32,7 +32,7 @@ A Minecraft 1.21.1 **NeoForge** mod that adds a **Storage Terminal** — a block
 ## Installation
 
 1. Install [NeoForge](https://neoforged.net/) for Minecraft 1.21.1.
-2. Place the `storage_central-1.0.0.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page into your `mods/` folder.
+2. Place the `storage_central-1.26.9.9.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page into your `mods/` folder.
 3. Launch the game.
 
 ## Building from source
@@ -43,7 +43,7 @@ Requires **Java 21** (auto-provisioned by the Gradle toolchain).
 ./gradlew build
 ```
 
-The built mod JAR will be at `build/libs/storage_central-1.0.0.jar`.
+The built mod JAR will be at `build/libs/storage_central-1.26.9.9.jar`.
 
 > Note: run `build` only. Do **not** run `runClient`/`runServer` during development if you prefer to test via a launcher (e.g. Prism Launcher) pointing at an existing installation.
 
