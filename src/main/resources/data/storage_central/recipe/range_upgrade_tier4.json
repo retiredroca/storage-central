@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " E ",
+    "EIE",
+    " E "
+  ],
+  "key": {
+    "E": { "item": "minecraft:emerald" },
+    "I": { "item": "storage_central:range_upgrade_tier3" }
+  },
+  "result": {
+    "id": "storage_central:range_upgrade_tier4",
+    "count": 1
+  }
+}

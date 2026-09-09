@@ -5,6 +5,8 @@
   "item.storage_central.range_upgrade_tier1": "Range Upgrade I",
   "item.storage_central.range_upgrade_tier2": "Range Upgrade II",
   "item.storage_central.range_upgrade_tier3": "Range Upgrade III",
+  "item.storage_central.range_upgrade_tier4": "Range Upgrade IV",
+  "item.storage_central.range_upgrade_tier5": "Range Upgrade V",
   "item.storage_central.range_upgrade.tier": "Tier %s",
   "item.storage_central.range_upgrade.desc": "Right-click a Storage Terminal to increase its scan range.",
   "gui.storage_central.search": "Search...",

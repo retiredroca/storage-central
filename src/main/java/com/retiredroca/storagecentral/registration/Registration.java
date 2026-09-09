@@ -48,6 +48,10 @@ public final class Registration {
             ITEMS.register("range_upgrade_tier2", () -> new RangeUpgradeItem(new Item.Properties(), 2));
     public static final DeferredItem<RangeUpgradeItem> RANGE_UPGRADE_TIER3 =
             ITEMS.register("range_upgrade_tier3", () -> new RangeUpgradeItem(new Item.Properties(), 3));
+    public static final DeferredItem<RangeUpgradeItem> RANGE_UPGRADE_TIER4 =
+            ITEMS.register("range_upgrade_tier4", () -> new RangeUpgradeItem(new Item.Properties(), 4));
+    public static final DeferredItem<RangeUpgradeItem> RANGE_UPGRADE_TIER5 =
+            ITEMS.register("range_upgrade_tier5", () -> new RangeUpgradeItem(new Item.Properties(), 5));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StorageTerminalBlockEntity>> STORAGE_TERMINAL_BE =
             BLOCK_ENTITIES.register("storage_terminal",
@@ -67,6 +71,8 @@ public final class Registration {
                         output.accept(RANGE_UPGRADE_TIER1.get());
                         output.accept(RANGE_UPGRADE_TIER2.get());
                         output.accept(RANGE_UPGRADE_TIER3.get());
+                        output.accept(RANGE_UPGRADE_TIER4.get());
+                        output.accept(RANGE_UPGRADE_TIER5.get());
                     })
                     .build());
 

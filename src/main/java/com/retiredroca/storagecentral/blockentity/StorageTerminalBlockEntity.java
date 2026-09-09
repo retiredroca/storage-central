@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.retiredroca.storagecentral.config.StorageCentralConfig;
 import com.retiredroca.storagecentral.menu.StorageTerminalMenu;
 import com.retiredroca.storagecentral.registration.Registration;
 
@@ -28,7 +29,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvider {
     private static final String TAG_TIER = "tier";
-    private static final long[] CHUNK_RADII = { 0, 1, 2, 3 };
+    private static final long[] CHUNK_RADII = { 0, 1, 2, 3, 4, 5 };
 
     private int tier = 0;
 
@@ -44,12 +45,25 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
         return tier;
     }
 
+    public int getEffectiveMaxTier() {
+        int cap = StorageCentralConfig.getMaxTier();
+        if (level instanceof ServerLevel serverLevel) {
+            int viewDistance = serverLevel.getServer().getPlayerList().getViewDistance();
+            int simDistance = serverLevel.getServer().getPlayerList().getSimulationDistance();
+            int radius = Math.min(viewDistance, simDistance);
+            for (int t = 0; t < CHUNK_RADII.length && CHUNK_RADII[t] <= radius; t++) {
+                cap = t;
+            }
+        }
+        return cap;
+    }
+
     public int getChunkRadius() {
-        return (int) CHUNK_RADII[Math.min(tier, CHUNK_RADII.length - 1)];
+        return (int) CHUNK_RADII[Math.min(getEffectiveMaxTier(), CHUNK_RADII.length - 1)];
     }
 
     public boolean tryApplyUpgrade(int upgradeTier, @Nullable Player player) {
-        if (upgradeTier == getTier() + 1 && upgradeTier < CHUNK_RADII.length) {
+        if (upgradeTier == getTier() + 1 && upgradeTier <= getEffectiveMaxTier()) {
             this.tier = upgradeTier;
             setChanged();
             return true;
