@@ -1,5 +1,7 @@
 # Storage Central
 
+![Storage Central demo](storage-central.gif)
+
 A Minecraft 1.21.1 **NeoForge** mod that adds a **Storage Terminal** — a block that scans nearby chunks for any storage container and lets you access, search, and manage all of your items from a single, fast interface.
 
 > Currently in development. Tested in single-player and on LAN/dedicated servers.
