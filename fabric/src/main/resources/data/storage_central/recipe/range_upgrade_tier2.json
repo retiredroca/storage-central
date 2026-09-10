@@ -1,12 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " D ",
-    "DID",
-    " D "
+    " G ",
+    "GIG",
+    " G "
   ],
   "key": {
-    "D": { "item": "minecraft:diamond" },
+    "G": { "item": "minecraft:gold_ingot" },
     "I": { "item": "storage_central:range_upgrade_tier1" }
   },
   "result": {

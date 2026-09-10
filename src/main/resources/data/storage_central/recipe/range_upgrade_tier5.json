@@ -1,12 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " D ",
-    "DID",
-    " D "
+    " N ",
+    "NIN",
+    " N "
   ],
   "key": {
-    "D": { "item": "minecraft:diamond_block" },
+    "N": { "item": "minecraft:netherite_ingot" },
     "I": { "item": "storage_central:range_upgrade_tier4" }
   },
   "result": {

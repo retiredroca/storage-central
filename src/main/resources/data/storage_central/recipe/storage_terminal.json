@@ -6,7 +6,7 @@
     "III"
   ],
   "key": {
-    "I": { "item": "minecraft:iron_ingot" },
+    "I": { "item": "minecraft:copper_ingot" },
     "C": { "item": "minecraft:chest" }
   },
   "result": {

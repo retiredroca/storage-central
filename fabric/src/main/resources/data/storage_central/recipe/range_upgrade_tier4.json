@@ -1,12 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " E ",
-    "EIE",
-    " E "
+    " D ",
+    "DID",
+    " D "
   ],
   "key": {
-    "E": { "item": "minecraft:emerald" },
+    "D": { "item": "minecraft:diamond" },
     "I": { "item": "storage_central:range_upgrade_tier3" }
   },
   "result": {

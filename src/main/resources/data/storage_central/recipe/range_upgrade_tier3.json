@@ -1,12 +1,12 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " N ",
-    "NIN",
-    " N "
+    " E ",
+    "EIE",
+    " E "
   ],
   "key": {
-    "N": { "item": "minecraft:netherite_ingot" },
+    "E": { "item": "minecraft:emerald" },
     "I": { "item": "storage_central:range_upgrade_tier2" }
   },
   "result": {
