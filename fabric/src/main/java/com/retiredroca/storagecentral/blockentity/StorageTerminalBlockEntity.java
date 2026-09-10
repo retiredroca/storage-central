@@ -25,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -43,6 +44,7 @@ public class StorageTerminalBlockEntity extends BlockEntity implements ExtendedS
 
     private List<Storage<ItemVariant>> scannedHandlers = new ArrayList<>();
     private Map<Storage<ItemVariant>, String> handlerLabel = new HashMap<>();
+    private Map<Storage<ItemVariant>, BlockPos> handlerPos = new HashMap<>();
     private long lastScan = 0;
 
     public StorageTerminalBlockEntity(BlockPos pos, BlockState state) {
@@ -123,6 +125,7 @@ public class StorageTerminalBlockEntity extends BlockEntity implements ExtendedS
             lastScan = now;
             scannedHandlers.clear();
             handlerLabel.clear();
+            handlerPos.clear();
 
             int radius = getChunkRadius();
             int centerX = worldPosition.getX() >> 4;
@@ -152,7 +155,12 @@ public class StorageTerminalBlockEntity extends BlockEntity implements ExtendedS
             Storage<ItemVariant> storage = ItemStorage.SIDED.find(serverLevel, pos, null);
             if (storage != null) {
                 scannedHandlers.add(storage);
-                handlerLabel.put(storage, blockEntity.getBlockState().getBlock().getName().getString());
+                Component label = null;
+                if (blockEntity instanceof Nameable nameable && nameable.hasCustomName() && nameable.getCustomName() != null) {
+                    label = nameable.getCustomName();
+                }
+                handlerLabel.put(storage, (label != null ? label : blockEntity.getBlockState().getBlock().getName()).getString());
+                handlerPos.put(storage, pos);
             }
         }
     }
@@ -163,6 +171,10 @@ public class StorageTerminalBlockEntity extends BlockEntity implements ExtendedS
 
     public String labelFor(Storage<ItemVariant> handler) {
         return handlerLabel.getOrDefault(handler, "?");
+    }
+
+    public BlockPos posFor(Storage<ItemVariant> handler) {
+        return handlerPos.get(handler);
     }
 
     public boolean stillValid(Player player) {

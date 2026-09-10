@@ -26,11 +26,21 @@ public final class Networking {
     public static final ResourceLocation TERMINAL_SYNC = ResourceLocation.fromNamespaceAndPath(StorageCentral.MODID, "terminal_sync");
     public static final ResourceLocation TERMINAL_EXTRACT = ResourceLocation.fromNamespaceAndPath(StorageCentral.MODID, "terminal_extract");
 
-    public record TerminalSyncPayload(List<ItemStack> items, List<Integer> counts, int tier) implements CustomPacketPayload {
+    public record ChestSync(String name, BlockPos pos, List<ItemStack> items, List<Integer> counts) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, ChestSync> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8, ChestSync::name,
+                BlockPos.STREAM_CODEC, ChestSync::pos,
+                ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), ChestSync::items,
+                ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), ChestSync::counts,
+                ChestSync::new);
+    }
+
+    public record TerminalSyncPayload(List<ItemStack> items, List<Integer> counts, List<ChestSync> chests, int tier) implements CustomPacketPayload {
         public static final Type<TerminalSyncPayload> TYPE = new Type<>(TERMINAL_SYNC);
         public static final StreamCodec<RegistryFriendlyByteBuf, TerminalSyncPayload> STREAM_CODEC = StreamCodec.composite(
                 ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()), TerminalSyncPayload::items,
                 ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list()), TerminalSyncPayload::counts,
+                ChestSync.STREAM_CODEC.apply(ByteBufCodecs.list()), TerminalSyncPayload::chests,
                 ByteBufCodecs.VAR_INT, TerminalSyncPayload::tier,
                 TerminalSyncPayload::new);
 
@@ -73,7 +83,7 @@ public final class Networking {
         context.enqueueWork(() -> {
             if (net.minecraft.client.Minecraft.getInstance().player != null
                     && net.minecraft.client.Minecraft.getInstance().player.containerMenu instanceof StorageTerminalMenu menu) {
-                menu.updateServerItems(payload.items(), payload.counts(), payload.tier());
+                menu.updateServerItems(payload.items(), payload.counts(), payload.chests(), payload.tier());
             }
         });
     }
@@ -97,25 +107,40 @@ public final class Networking {
         List<ItemStack> items = new ArrayList<>();
         List<Integer> counts = new ArrayList<>();
         for (IItemHandler handler : dedupeHandlers(terminal.getScannedHandlers())) {
-            for (int i = 0; i < handler.getSlots(); i++) {
-                ItemStack stack = handler.getStackInSlot(i);
-                if (!stack.isEmpty()) {
-                    boolean matched = false;
-                    for (int j = 0; j < items.size(); j++) {
-                        if (ItemStack.isSameItemSameComponents(items.get(j), stack)) {
-                            counts.set(j, counts.get(j) + stack.getCount());
-                            matched = true;
-                            break;
-                        }
+            aggregate(handler, items, counts);
+        }
+        List<ChestSync> chests = new ArrayList<>();
+        for (IItemHandler handler : terminal.getScannedHandlers()) {
+            BlockPos pos = terminal.posFor(handler);
+            if (pos == null) {
+                continue;
+            }
+            List<ItemStack> chestItems = new ArrayList<>();
+            List<Integer> chestCounts = new ArrayList<>();
+            aggregate(handler, chestItems, chestCounts);
+            chests.add(new ChestSync(terminal.labelFor(handler), pos, chestItems, chestCounts));
+        }
+        PacketDistributor.sendToPlayer(player, new TerminalSyncPayload(items, counts, chests, terminal.getTier()));
+    }
+
+    private static void aggregate(IItemHandler handler, List<ItemStack> items, List<Integer> counts) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemStack stack = handler.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                boolean matched = false;
+                for (int j = 0; j < items.size(); j++) {
+                    if (ItemStack.isSameItemSameComponents(items.get(j), stack)) {
+                        counts.set(j, counts.get(j) + stack.getCount());
+                        matched = true;
+                        break;
                     }
-                    if (!matched) {
-                        items.add(stack.copy());
-                        counts.add(stack.getCount());
-                    }
+                }
+                if (!matched) {
+                    items.add(stack.copy());
+                    counts.add(stack.getCount());
                 }
             }
         }
-        PacketDistributor.sendToPlayer(player, new TerminalSyncPayload(items, counts, terminal.getTier()));
     }
 
     /**

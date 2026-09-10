@@ -13,10 +13,10 @@ tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
-// Version is derived from the build date: 1.YY.M.D (e.g. 1.26.9.10 for Sept 10, 2026).
-def dateVersion = "1.${LocalDate.now().getYear() % 100}.${LocalDate.now().getMonthValue()}.${LocalDate.now().getDayOfMonth()}"
+// Version is derived from the build date: 1.YY.MM.DD.HH (e.g. 1.26.09.10.14 for Sept 10, 2026 @ 14:00).
+def dateVersion = "1." + String.format("%02d.%02d.%02d.%02d", LocalDateTime.now().getYear() % 100, LocalDateTime.now().getMonthValue(), LocalDateTime.now().getDayOfMonth(), LocalDateTime.now().getHour())
 version = dateVersion
 group = mod_group_id
 

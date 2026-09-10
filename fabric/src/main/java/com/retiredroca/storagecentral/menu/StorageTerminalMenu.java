@@ -3,6 +3,7 @@ package com.retiredroca.storagecentral.menu;
 import java.util.List;
 
 import com.retiredroca.storagecentral.blockentity.StorageTerminalBlockEntity;
+import com.retiredroca.storagecentral.network.Networking;
 import com.retiredroca.storagecentral.registration.Registration;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -25,6 +26,7 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
 
     private List<ItemStack> serverItems = List.of();
     private List<Integer> serverCounts = List.of();
+    private List<Networking.ChestSync> serverChests = List.of();
     private int serverTier = 0;
     private int dataVersion = 0;
 
@@ -72,13 +74,18 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
         return serverCounts;
     }
 
+    public List<Networking.ChestSync> getServerChests() {
+        return serverChests;
+    }
+
     public int getServerTier() {
         return serverTier;
     }
 
-    public void updateServerItems(List<ItemStack> items, List<Integer> counts, int tier) {
+    public void updateServerItems(List<ItemStack> items, List<Integer> counts, List<Networking.ChestSync> chests, int tier) {
         this.serverItems = items;
         this.serverCounts = counts;
+        this.serverChests = chests;
         this.serverTier = tier;
         this.dataVersion++;
     }

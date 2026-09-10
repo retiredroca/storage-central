@@ -22,6 +22,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -41,6 +42,7 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
 
     private List<IItemHandler> scannedHandlers = new ArrayList<>();
     private Map<IItemHandler, String> handlerLabel = new HashMap<>();
+    private Map<IItemHandler, BlockPos> handlerPos = new HashMap<>();
     private long lastScan = 0;
 
     public StorageTerminalBlockEntity(BlockPos pos, BlockState state) {
@@ -121,6 +123,7 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
             lastScan = now;
             scannedHandlers.clear();
             handlerLabel.clear();
+            handlerPos.clear();
 
             int radius = getChunkRadius();
             int centerX = worldPosition.getX() >> 4;
@@ -154,7 +157,12 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
                 IItemHandler handler = serverLevel.getCapability(Capabilities.ItemHandler.BLOCK, pos, side);
                 if (handler != null) {
                     scannedHandlers.add(handler);
-                    handlerLabel.put(handler, blockEntity.getBlockState().getBlock().getName().getString());
+                    Component label = null;
+                    if (blockEntity instanceof Nameable nameable && nameable.hasCustomName() && nameable.getCustomName() != null) {
+                        label = nameable.getCustomName();
+                    }
+                    handlerLabel.put(handler, (label != null ? label : blockEntity.getBlockState().getBlock().getName()).getString());
+                    handlerPos.put(handler, pos);
                     break;
                 }
             }
@@ -167,6 +175,10 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
 
     public String labelFor(IItemHandler handler) {
         return handlerLabel.getOrDefault(handler, "?");
+    }
+
+    public BlockPos posFor(IItemHandler handler) {
+        return handlerPos.get(handler);
     }
 
     public boolean stillValid(Player player) {
