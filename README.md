@@ -35,13 +35,13 @@ A Minecraft 1.21.1 mod for **NeoForge** and **Fabric** that adds a **Storage Ter
 **NeoForge edition**
 
 1. Install [NeoForge](https://neoforged.net/) for Minecraft 1.21.1.
-2. Place `neoforge-storage_central-1.26.9.9.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page (NeoForge edition) into your `mods/` folder.
+2. Place `neoforge-storage_central-1.YY.MM.DD.HH.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page (NeoForge edition) into your `mods/` folder.
 3. Launch the game.
 
 **Fabric edition**
 
 1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.21.1, plus Fabric API.
-2. Place the Fabric `fabric-storage_central-1.26.9.9.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page into your `mods/` folder.
+2. Place the Fabric `fabric-storage_central-1.YY.MM.DD.HH.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page into your `mods/` folder.
 3. Launch the game.
 
 ## Building from source
@@ -55,7 +55,7 @@ cd neoforge
 ./gradlew build
 ```
 
-The built mod JAR will be at `neoforge/build/libs/neoforge-storage_central-1.26.9.9.jar`.
+The built mod JAR will be at `neoforge/build/libs/neoforge-storage_central-1.YY.MM.DD.HH.jar`.
 
 **Fabric edition** (from the `fabric/` folder):
 
@@ -64,7 +64,7 @@ cd fabric
 ./gradlew build
 ```
 
-The built mod JAR will be at `fabric/build/libs/fabric-storage_central-1.26.9.9.jar`.
+The built mod JAR will be at `fabric/build/libs/fabric-storage_central-1.YY.MM.DD.HH.jar`.
 
 > Note: run `build` only. Do **not** run `runClient`/`runServer` during development if you prefer to test via a launcher (e.g. Prism Launcher) pointing at an existing installation.
 
