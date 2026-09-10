@@ -1,0 +1,4 @@
+{
+  "type": "storage_central:terminal_upgrade",
+  "target_tier": 2
+}

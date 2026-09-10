@@ -3,7 +3,11 @@ plugins {
     id 'maven-publish'
 }
 
-version = mod_version
+import java.time.LocalDate
+
+// Version is derived from the build date: 1.YY.M.D (e.g. 1.26.9.10 for Sept 10, 2026).
+def dateVersion = "1.${LocalDate.now().getYear() % 100}.${LocalDate.now().getMonthValue()}.${LocalDate.now().getDayOfMonth()}"
+version = dateVersion
 group = mod_group_id
 
 base {

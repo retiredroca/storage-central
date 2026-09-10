@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "storage_central:block/storage_terminal"
-    }
+    "facing=north": { "model": "storage_central:block/storage_terminal" },
+    "facing=south": { "model": "storage_central:block/storage_terminal", "y": 180 },
+    "facing=west": { "model": "storage_central:block/storage_terminal", "y": 270 },
+    "facing=east": { "model": "storage_central:block/storage_terminal", "y": 90 }
   }
 }

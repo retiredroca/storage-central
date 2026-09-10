@@ -92,6 +92,14 @@ public class StorageTerminalMenu extends AbstractContainerMenu {
     }
 
     @Override
+    public void removed(Player player) {
+        if (terminal != null) {
+            terminal.stopOpen(player);
+        }
+        super.removed(player);
+    }
+
+    @Override
     public ItemStack quickMoveStack(Player player, int index) {
         if (index < 0 || index >= SLOT_COUNT || terminal == null) {
             return ItemStack.EMPTY;

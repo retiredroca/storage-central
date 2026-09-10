@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.retiredroca.storagecentral.config.StorageCentralConfig;
 import com.retiredroca.storagecentral.menu.StorageTerminalMenu;
 import com.retiredroca.storagecentral.registration.Registration;
@@ -16,7 +14,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -32,6 +36,8 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
     private static final long[] CHUNK_RADII = { 0, 1, 2, 3, 4, 5 };
 
     private int tier = 0;
+    private boolean lidOpen = false;
+    private long lidChangeTime = 0;
 
     private List<IItemHandler> scannedHandlers = new ArrayList<>();
     private Map<IItemHandler, String> handlerLabel = new HashMap<>();
@@ -59,16 +65,51 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
     }
 
     public int getChunkRadius() {
-        return (int) CHUNK_RADII[Math.min(getEffectiveMaxTier(), CHUNK_RADII.length - 1)];
+        int effectiveTier = Math.min(tier, getEffectiveMaxTier());
+        return (int) CHUNK_RADII[Math.min(effectiveTier, CHUNK_RADII.length - 1)];
     }
 
-    public boolean tryApplyUpgrade(int upgradeTier, @Nullable Player player) {
-        if (upgradeTier == getTier() + 1 && upgradeTier <= getEffectiveMaxTier()) {
-            this.tier = upgradeTier;
-            setChanged();
+    public void startOpen(Player player) {
+        if (level == null || level.isClientSide || lidOpen) {
+            return;
+        }
+        lidOpen = true;
+        lidChangeTime = level.getGameTime();
+        level.playSound(null, worldPosition, SoundEvents.ENDER_CHEST_OPEN, SoundSource.BLOCKS, 0.5F,
+                level.random.nextFloat() * 0.1F + 0.9F);
+        level.blockEvent(worldPosition, getBlockState().getBlock(), 1, 1);
+    }
+
+    public void stopOpen(Player player) {
+        if (level == null || level.isClientSide || !lidOpen) {
+            return;
+        }
+        lidOpen = false;
+        lidChangeTime = level.getGameTime();
+        level.playSound(null, worldPosition, SoundEvents.ENDER_CHEST_CLOSE, SoundSource.BLOCKS, 0.5F,
+                level.random.nextFloat() * 0.1F + 0.9F);
+        level.blockEvent(worldPosition, getBlockState().getBlock(), 1, 0);
+    }
+
+    @Override
+    public boolean triggerEvent(int type, int data) {
+        if (type == 1) {
+            lidOpen = data != 0;
+            if (level != null) {
+                lidChangeTime = level.getGameTime();
+            }
             return true;
         }
-        return false;
+        return super.triggerEvent(type, data);
+    }
+
+    public float getOpenNess(float partialTick) {
+        if (level == null || lidChangeTime == 0) {
+            return 0.0F;
+        }
+        float elapsed = (float) (level.getGameTime() - lidChangeTime) + partialTick;
+        float t = Mth.clamp(elapsed / 7.0F, 0.0F, 1.0F);
+        return lidOpen ? t : 1.0F - t;
     }
 
     public void scanNetwork() {
@@ -156,5 +197,23 @@ public class StorageTerminalBlockEntity extends BlockEntity implements MenuProvi
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt(TAG_TIER, tier);
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        tag.putInt(TAG_TIER, tier);
+        return tag;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        super.handleUpdateTag(tag, registries);
+        tier = tag.getInt(TAG_TIER);
     }
 }
