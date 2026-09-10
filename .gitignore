@@ -40,5 +40,4 @@ repo/
 !**/src/**/repo/
 
 ### Local testing / dev screenshots ###
-*.png
 oc.sh
