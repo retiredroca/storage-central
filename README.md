@@ -48,13 +48,14 @@ A Minecraft 1.21.1 mod for **NeoForge** and **Fabric** that adds a **Storage Ter
 
 Requires **Java 21** (auto-provisioned by the Gradle toolchain).
 
-**NeoForge edition** (from the repository root):
+**NeoForge edition** (from the `neoforge/` folder):
 
 ```bash
+cd neoforge
 ./gradlew build
 ```
 
-The built mod JAR will be at `build/libs/neoforge-storage_central-1.26.9.9.jar`.
+The built mod JAR will be at `neoforge/build/libs/neoforge-storage_central-1.26.9.9.jar`.
 
 **Fabric edition** (from the `fabric/` folder):
 
@@ -78,7 +79,7 @@ The built mod JAR will be at `fabric/build/libs/fabric-storage_central-1.26.9.9.
 
 ## Recipes
 
-Recipes for the terminal and the five range upgrades are included in `src/main/resources/data/storage_central/recipe/` (NeoForge) and `fabric/src/main/resources/data/storage_central/recipe/` (Fabric).
+Recipes for the terminal and the five range upgrades are included in `neoforge/src/main/resources/data/storage_central/recipe/` (NeoForge) and `fabric/src/main/resources/data/storage_central/recipe/` (Fabric).
 
 ## Configuration
 
