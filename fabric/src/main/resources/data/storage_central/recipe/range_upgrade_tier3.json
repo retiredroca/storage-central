@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " N ",
+    "NIN",
+    " N "
+  ],
+  "key": {
+    "N": { "item": "minecraft:netherite_ingot" },
+    "I": { "item": "storage_central:range_upgrade_tier2" }
+  },
+  "result": {
+    "id": "storage_central:range_upgrade_tier3",
+    "count": 1
+  }
+}

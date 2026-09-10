@@ -2,7 +2,7 @@
 
 ![Storage Central demo](storage-central.gif)
 
-A Minecraft 1.21.1 **NeoForge** mod that adds a **Storage Terminal** — a block that scans nearby chunks for any storage container and lets you access, search, and manage all of your items from a single, fast interface.
+A Minecraft 1.21.1 mod for **NeoForge** and **Fabric** that adds a **Storage Terminal** — a block that scans nearby chunks for any storage container and lets you access, search, and manage all of your items from a single, fast interface.
 
 > Currently in development. Tested in single-player and on LAN/dedicated servers.
 
@@ -27,23 +27,43 @@ A Minecraft 1.21.1 **NeoForge** mod that adds a **Storage Terminal** — a block
 ## Requirements
 
 - **Minecraft**: 1.21.1
-- **NeoForge**: 21.1.235 or later
+- **NeoForge** edition: NeoForge 21.1.235 or later
+- **Fabric** edition: Fabric Loader 0.16.14 or later + [Fabric API](https://modrinth.com/mod/fabric-api)
 
 ## Installation
 
+**NeoForge edition**
+
 1. Install [NeoForge](https://neoforged.net/) for Minecraft 1.21.1.
-2. Place the `storage_central-1.26.9.9.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page into your `mods/` folder.
+2. Place `storage_central-1.26.9.9.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page (NeoForge edition) into your `mods/` folder.
+3. Launch the game.
+
+**Fabric edition**
+
+1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.21.1, plus Fabric API.
+2. Place the Fabric `storage_central-1.26.9.9.jar` from the [Releases](https://github.com/RetiredRoca/storage-central/releases) page into your `mods/` folder.
 3. Launch the game.
 
 ## Building from source
 
 Requires **Java 21** (auto-provisioned by the Gradle toolchain).
 
+**NeoForge edition** (from the repository root):
+
 ```bash
 ./gradlew build
 ```
 
 The built mod JAR will be at `build/libs/storage_central-1.26.9.9.jar`.
+
+**Fabric edition** (from the `fabric/` folder):
+
+```bash
+cd fabric
+./gradlew build
+```
+
+The built mod JAR will be at `fabric/build/libs/storage_central-1.26.9.9.jar`.
 
 > Note: run `build` only. Do **not** run `runClient`/`runServer` during development if you prefer to test via a launcher (e.g. Prism Launcher) pointing at an existing installation.
 
@@ -58,23 +78,24 @@ The built mod JAR will be at `build/libs/storage_central-1.26.9.9.jar`.
 
 ## Recipes
 
-Recipes for the terminal and the five range upgrades are included in `src/main/resources/data/storage_central/recipe/`.
+Recipes for the terminal and the five range upgrades are included in `src/main/resources/data/storage_central/recipe/` (NeoForge) and `fabric/src/main/resources/data/storage_central/recipe/` (Fabric).
 
 ## Configuration
 
-On servers, the max tier can be limited via `config/storage_central-server.toml` (generated on first run):
+The max tier can be limited per server. The effective tier is also capped automatically by the smaller of the server's `view-distance` and `simulation-distance` from `server.properties`, so upgrades never scan further than chunks are actually generated/loaded.
 
-- `maxTier` — hard cap on the highest tier that may be applied (default `5`).
-- The effective tier is also capped automatically by the smaller of the server's `view-distance` and `simulation-distance` from `server.properties`, so upgrades never scan further than chunks are actually generated/loaded.
+- **NeoForge**: `config/storage_central-server.toml` (generated on first run) — `maxTier` hard caps the highest tier that may be applied (default `5`).
+- **Fabric**: `config/storage_central.json` (generated on first run) — `maxTier` behaves the same (default `5`).
 
 ## Configuration / Credits
 
 - **Mod ID**: `storage_central`
 - **Package**: `com.retiredroca.storagecentral`
-- **Server config**: `config/storage_central-server.toml`
+- **Server config (NeoForge)**: `config/storage_central-server.toml`
+- **Server config (Fabric)**: `config/storage_central.json`
 
 ## License
 
 Released under the [Apache License 2.0](LICENSE).
 
-*Built with the [NeoForge MDK](https://github.com/neoforged/MDK). Minecraft and NeoForge are property of their respective owners.*
+*NeoForge edition built with the [MDK](https://github.com/neoforged/MDK); Fabric edition built with the [Fabric Example Mod](https://github.com/FabricMC/fabric-example-mod). Minecraft, NeoForge and Fabric are property of their respective owners.*
