@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.retiredroca.storagecentral.registration.Registration;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
@@ -104,6 +106,37 @@ public class TerminalUpgradeRecipe implements CraftingRecipe {
         BlockEntity.addEntityType(tag, Registration.getTerminalBEType());
         CustomData.set(DataComponents.BLOCK_ENTITY_DATA, result, tag);
         return result;
+    }
+
+    @Override
+    public NonNullList<Ingredient> getIngredients() {
+        NonNullList<Ingredient> list = NonNullList.withSize(9, Ingredient.EMPTY);
+        Ingredient ring = Ingredient.of(materialFor(targetTier));
+        list.set(1, ring);
+        list.set(3, ring);
+        list.set(5, ring);
+        list.set(7, ring);
+        list.set(4, Ingredient.of(previousTierStack()));
+        return list;
+    }
+
+    @Override
+    public boolean isIncomplete() {
+        NonNullList<Ingredient> list = getIngredients();
+        return list.isEmpty() || list.stream()
+                .filter(ingredient -> !ingredient.isEmpty())
+                .anyMatch(ingredient -> ingredient.getItems().length == 0);
+    }
+
+    private ItemStack previousTierStack() {
+        ItemStack stack = new ItemStack(Registration.getTerminalItem());
+        if (targetTier > 1) {
+            CompoundTag tag = new CompoundTag();
+            tag.putInt(TAG_TIER, targetTier - 1);
+            BlockEntity.addEntityType(tag, Registration.getTerminalBEType());
+            CustomData.set(DataComponents.BLOCK_ENTITY_DATA, stack, tag);
+        }
+        return stack;
     }
 
     private static Item materialFor(int tier) {

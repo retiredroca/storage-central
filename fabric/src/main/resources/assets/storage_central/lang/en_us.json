@@ -13,5 +13,6 @@
   "sort.storage_central.type": "Type",
   "sort.storage_central.tag": "Tag",
   "sort.storage_central.mod": "Mod",
-  "sort.storage_central.equipment": "Equip"
+  "sort.storage_central.equipment": "Equip",
+  "disconnect.storage_central.server_requires.reason": "This server requires Storage Central. Please install it and reconnect."
 }

@@ -4,6 +4,7 @@ import com.retiredroca.storagecentral.StorageCentral;
 import com.retiredroca.storagecentral.block.StorageTerminalBlock;
 import com.retiredroca.storagecentral.blockentity.StorageTerminalBlockEntity;
 import com.retiredroca.storagecentral.menu.StorageTerminalMenu;
+import com.retiredroca.storagecentral.network.Networking;
 import com.retiredroca.storagecentral.recipe.TerminalUpgradeRecipe;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
@@ -73,6 +74,9 @@ public final class Registration {
                         .icon(() -> terminalWithTier(0))
                         .build());
         ItemGroupEvents.modifyEntriesEvent(STORAGE_CENTRAL_TAB_KEY).register(output -> {
+            if (!Networking.isServerModded()) {
+                return;
+            }
             for (int i = 0; i < TIER_NAMES.length; i++) {
                 output.accept(terminalWithTier(i));
             }

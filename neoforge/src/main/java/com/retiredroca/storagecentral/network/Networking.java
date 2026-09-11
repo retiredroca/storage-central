@@ -5,6 +5,7 @@ import com.retiredroca.storagecentral.blockentity.StorageTerminalBlockEntity;
 import com.retiredroca.storagecentral.menu.StorageTerminalMenu;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +13,11 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -25,6 +30,21 @@ import net.neoforged.neoforge.items.IItemHandler;
 public final class Networking {
     public static final ResourceLocation TERMINAL_SYNC = ResourceLocation.fromNamespaceAndPath(StorageCentral.MODID, "terminal_sync");
     public static final ResourceLocation TERMINAL_EXTRACT = ResourceLocation.fromNamespaceAndPath(StorageCentral.MODID, "terminal_extract");
+    public static final ResourceLocation SERVER_PRESENCE = ResourceLocation
+            .fromNamespaceAndPath(StorageCentral.MODID, "server_presence");
+
+    private static volatile boolean serverHasMod;
+
+    public record ServerPresencePayload() implements CustomPacketPayload {
+        public static final Type<ServerPresencePayload> TYPE = new Type<>(SERVER_PRESENCE);
+        public static final StreamCodec<FriendlyByteBuf, ServerPresencePayload> STREAM_CODEC = StreamCodec
+                .unit(new ServerPresencePayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
 
     public record ChestSync(String name, BlockPos pos, List<ItemStack> items, List<Integer> counts) {
         public static final StreamCodec<RegistryFriendlyByteBuf, ChestSync> STREAM_CODEC = StreamCodec.composite(
@@ -68,12 +88,40 @@ public final class Networking {
 
     public static void register(IEventBus modEventBus) {
         modEventBus.addListener(Networking::onRegisterPayloads);
+        NeoForge.EVENT_BUS.addListener(Networking::onPlayerLoggedIn);
     }
 
     private static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(StorageCentral.MODID).versioned("1");
+        if (FMLLoader.getDist() == Dist.CLIENT) {
+            registrar = registrar.optional();
+        }
+        registrar.playToClient(ServerPresencePayload.TYPE, ServerPresencePayload.STREAM_CODEC, Networking::handlePresence);
         registrar.playToClient(TerminalSyncPayload.TYPE, TerminalSyncPayload.STREAM_CODEC, Networking::handleSync);
         registrar.playToServer(TerminalExtractPayload.TYPE, TerminalExtractPayload.STREAM_CODEC, Networking::handleExtract);
+    }
+
+    private static void handlePresence(ServerPresencePayload payload, IPayloadContext context) {
+        if (context.flow().isClientbound()) {
+            context.enqueueWork(() -> setServerModded(true));
+        }
+    }
+
+    private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            PacketDistributor.sendToPlayer(player, new ServerPresencePayload());
+        }
+    }
+
+    public static void setServerModded(boolean present) {
+        if (present && !serverHasMod) {
+            StorageCentral.LOGGER.info("Server has {} installed - enabling.", StorageCentral.MODID);
+        }
+        serverHasMod = present;
+    }
+
+    public static boolean isServerModded() {
+        return serverHasMod;
     }
 
     private static void handleSync(TerminalSyncPayload payload, IPayloadContext context) {
@@ -187,6 +235,9 @@ public final class Networking {
     }
 
     public static void sendExtract(net.minecraft.core.BlockPos pos, ItemStack stack, int mode) {
+        if (!isServerModded()) {
+            return;
+        }
         PacketDistributor.sendToServer(new TerminalExtractPayload(pos, stack, mode));
     }
 }

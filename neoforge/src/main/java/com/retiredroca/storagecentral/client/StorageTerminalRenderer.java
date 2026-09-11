@@ -16,13 +16,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 
 public class StorageTerminalRenderer implements BlockEntityRenderer<StorageTerminalBlockEntity> {
-    private static final ResourceLocation[] TEXTURES = {
-            ResourceLocation.fromNamespaceAndPath("storage_central", "textures/entity/chest/copper.png"),
-            ResourceLocation.fromNamespaceAndPath("storage_central", "textures/entity/chest/iron.png"),
-            ResourceLocation.fromNamespaceAndPath("storage_central", "textures/entity/chest/gold.png"),
-            ResourceLocation.fromNamespaceAndPath("storage_central", "textures/entity/chest/emerald.png"),
-            ResourceLocation.fromNamespaceAndPath("storage_central", "textures/entity/chest/diamond.png"),
-            ResourceLocation.fromNamespaceAndPath("storage_central", "textures/entity/chest/netherite.png") };
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("storage_central",
+            "textures/entity/chest/copper.png");
+    private static final int[] TIER_COLORS = { 0xB87333, 0xC0C0C0, 0xF5C020, 0x41CD6D, 0x4EEDE9, 0x55585C };
 
     private final ModelPart root;
     private final ModelPart lid;
@@ -35,16 +31,6 @@ public class StorageTerminalRenderer implements BlockEntityRenderer<StorageTermi
         this.lid = baked.getChild("lid");
         this.lock = baked.getChild("lock");
         this.bottom = baked.getChild("bottom");
-    }
-
-    private ResourceLocation textureFor(int tier) {
-        if (tier < 0) {
-            return TEXTURES[0];
-        }
-        if (tier >= TEXTURES.length) {
-            return TEXTURES[TEXTURES.length - 1];
-        }
-        return TEXTURES[tier];
     }
 
     @Override
@@ -65,8 +51,12 @@ public class StorageTerminalRenderer implements BlockEntityRenderer<StorageTermi
         this.lock.xRot = -eased * 1.5707964F;
 
         VertexConsumer consumer = bufferSource
-                .getBuffer(RenderType.entityCutout(textureFor(entity.getTier())));
-        this.root.render(poseStack, consumer, light, overlay);
+                .getBuffer(RenderType.entityCutout(TEXTURE));
+        this.root.render(poseStack, consumer, light, overlay, 0xFF000000 | TIER_COLORS[easedTier(entity.getTier())]);
         poseStack.popPose();
+    }
+
+    private static int easedTier(int tier) {
+        return Math.max(0, Math.min(tier, TIER_COLORS.length - 1));
     }
 }

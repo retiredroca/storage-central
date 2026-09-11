@@ -9,14 +9,18 @@ import com.retiredroca.storagecentral.StorageCentral;
 import com.retiredroca.storagecentral.blockentity.StorageTerminalBlockEntity;
 import com.retiredroca.storagecentral.menu.StorageTerminalMenu;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -27,6 +31,21 @@ import net.minecraft.world.item.ItemStack;
 public final class Networking {
     public static final ResourceLocation TERMINAL_SYNC = ResourceLocation.fromNamespaceAndPath(StorageCentral.MODID, "terminal_sync");
     public static final ResourceLocation TERMINAL_EXTRACT = ResourceLocation.fromNamespaceAndPath(StorageCentral.MODID, "terminal_extract");
+    public static final ResourceLocation SERVER_PRESENCE = ResourceLocation
+            .fromNamespaceAndPath(StorageCentral.MODID, "server_presence");
+
+    private static volatile boolean serverHasMod;
+
+    public record ServerPresencePayload() implements CustomPacketPayload {
+        public static final Type<ServerPresencePayload> TYPE = new Type<>(SERVER_PRESENCE);
+        public static final StreamCodec<FriendlyByteBuf, ServerPresencePayload> STREAM_CODEC = StreamCodec
+                .unit(new ServerPresencePayload());
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
 
     public record ChestSync(String name, BlockPos pos, List<ItemStack> items, List<Integer> counts) {
         public static final StreamCodec<RegistryFriendlyByteBuf, ChestSync> STREAM_CODEC = StreamCodec.composite(
@@ -71,11 +90,34 @@ public final class Networking {
     public static void register() {
         PayloadTypeRegistry.playC2S().register(TerminalExtractPayload.TYPE, TerminalExtractPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(TerminalSyncPayload.TYPE, TerminalSyncPayload.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(ServerPresencePayload.TYPE, ServerPresencePayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(TerminalExtractPayload.TYPE, Networking::handleExtract);
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayer player = handler.getPlayer();
+            if (!ServerPlayNetworking.canSend(player, ServerPresencePayload.TYPE)) {
+                player.connection.disconnect(Component.translatable("disconnect." + StorageCentral.MODID + ".server_requires.reason"));
+                return;
+            }
+            ServerPlayNetworking.send(player, new ServerPresencePayload());
+        });
     }
 
     public static void registerClient() {
         ClientPlayNetworking.registerGlobalReceiver(TerminalSyncPayload.TYPE, Networking::handleSync);
+        ClientPlayNetworking.registerGlobalReceiver(ServerPresencePayload.TYPE, (payload, context) ->
+                context.client().execute(() -> setServerModded(true)));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> setServerModded(false));
+    }
+
+    public static void setServerModded(boolean present) {
+        if (present && !serverHasMod) {
+            StorageCentral.LOGGER.info("Server has {} installed - enabling.", StorageCentral.MODID);
+        }
+        serverHasMod = present;
+    }
+
+    public static boolean isServerModded() {
+        return serverHasMod;
     }
 
     private static void handleSync(TerminalSyncPayload payload, ClientPlayNetworking.Context context) {
@@ -186,6 +228,9 @@ public final class Networking {
     }
 
     public static void sendExtract(BlockPos pos, ItemStack stack, int mode) {
+        if (!isServerModded()) {
+            return;
+        }
         ClientPlayNetworking.send(new TerminalExtractPayload(pos, stack, mode));
     }
 }

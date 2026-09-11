@@ -4,6 +4,7 @@ import com.retiredroca.storagecentral.StorageCentral;
 import com.retiredroca.storagecentral.block.StorageTerminalBlock;
 import com.retiredroca.storagecentral.blockentity.StorageTerminalBlockEntity;
 import com.retiredroca.storagecentral.menu.StorageTerminalMenu;
+import com.retiredroca.storagecentral.network.Networking;
 import com.retiredroca.storagecentral.recipe.TerminalUpgradeRecipe;
 
 import net.minecraft.core.registries.Registries;
@@ -78,6 +79,9 @@ public final class Registration {
                     .title(Component.translatable("itemGroup.storage_central"))
                     .icon(() -> terminalWithTier(0))
                     .displayItems((params, output) -> {
+                        if (!Networking.isServerModded()) {
+                            return;
+                        }
                         for (int i = 0; i < TIER_NAMES.length; i++) {
                             output.accept(terminalWithTier(i));
                         }
